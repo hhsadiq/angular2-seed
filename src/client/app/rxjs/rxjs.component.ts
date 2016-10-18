@@ -48,6 +48,7 @@ export class RxjsComponent implements OnInit {
    * in general, multiple clicks (two or more).
    */
   clickThrottle() {
+    // We should not access html directly in component, rather it should be done in directive
     let button = document.querySelector('.click-throttle');
     let clickStream = Observable.fromEvent(button, 'click');
     // The 4 lines of code that make the multi-click logic
