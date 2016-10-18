@@ -8,10 +8,11 @@ import { routes } from './app.routes';
 
 import { AboutModule } from './about/about.module';
 import { HomeModule } from './home/home.module';
+import { RxjsModule } from './rxjs/rxjs.module';
 import { SharedModule } from './shared/shared.module';
 
 @NgModule({
-  imports: [BrowserModule, HttpModule, RouterModule.forRoot(routes), AboutModule, HomeModule, SharedModule.forRoot()],
+  imports: [BrowserModule, HttpModule, RouterModule.forRoot(routes), AboutModule, HomeModule, RxjsModule, SharedModule.forRoot()],
   declarations: [AppComponent],
   providers: [{
     provide: APP_BASE_HREF,
