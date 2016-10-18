@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NameListService } from '../shared/index';
 import { Observable } from 'rxjs/Rx';
 import 'rxjs/add/operator/filter';
-import 'rxjs/add/operator/buffer';
+import 'rxjs/add/operator/bufferWhen';
 import 'rxjs/add/operator/throttleTime';
 import 'rxjs/add/operator/merge';
 import 'rxjs/add/operator/map';
@@ -37,7 +37,7 @@ export class RxjsComponent implements OnInit {
    * Get the names OnInit
    */
   ngOnInit() {
-    // this.clickThrottle();
+    this.clickThrottle();
     this.getNames();
   }
 
@@ -53,22 +53,30 @@ export class RxjsComponent implements OnInit {
     let clickStream = Observable.fromEvent(button, 'click');
     // The 4 lines of code that make the multi-click logic
     let multiClickStream = clickStream
-      .buffer(() => clickStream.throttleTime(250))
+      .bufferWhen(() => clickStream.throttleTime(250))
       .map((list:any) => list.length)
       .filter((x:any) => x >= 2);
 
     // Same as above, but detects single clicks
     let singleClickStream = clickStream
-      .buffer(() => clickStream.throttleTime(250))
+      .bufferWhen(() => clickStream.throttleTime(250))
       .map((list:any) => list.length)
       .filter((x:any) => x === 1);
 
     // Listen to both streams and render the text label accordingly
-    singleClickStream.subscribe((event:any) => this.textContent = 'click');
-    multiClickStream.subscribe((numclicks:any) => this.textContent = ''+numclicks+'x click');
+    singleClickStream.subscribe((event:any) => {
+      console.log(event);
+      this.textContent = 'click';
+    });
+    multiClickStream.subscribe((numclicks:any) => {
+      console.log(`${numclicks}x click`);
+      this.textContent = `${numclicks}x click`;
+    });
     Observable.merge(singleClickStream, multiClickStream)
       .throttleTime(1000)
-      .subscribe((suggestion:any) => this.textContent = '');
+      .subscribe((suggestion:any) => {
+        this.textContent = ''
+      });
   }
   /**
    * Handle the nameListService observable
