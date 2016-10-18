@@ -1,5 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { NameListService } from '../shared/index';
+import { Observable } from 'rxjs/Rx';
+import 'rxjs/add/operator/filter';
+import 'rxjs/add/operator/bufferWhen';
+import 'rxjs/add/operator/throttleTime';
+import 'rxjs/add/operator/merge';
+import 'rxjs/add/operator/map';
+
 
 /**
  * This class represents the lazy loaded HomeComponent.
@@ -14,6 +21,7 @@ import { NameListService } from '../shared/index';
 export class RxjsComponent implements OnInit {
 
   newName: string = '';
+  textContent: string = 'Double click it';
   errorMessage: string;
   names: any[] = [];
 
@@ -29,9 +37,48 @@ export class RxjsComponent implements OnInit {
    * Get the names OnInit
    */
   ngOnInit() {
+    this.clickThrottle();
     this.getNames();
   }
 
+  /**
+   * To show the real power of Reactive, let's just say that you want to have
+   * a stream of "double click" events. To make it even more interesting, let's
+   * say we want the new stream to consider triple clicks as double clicks, or
+   * in general, multiple clicks (two or more).
+   */
+  clickThrottle() {
+    // We should not access html directly in component, rather it should be done in directive
+    // OK MR. PERFECT, BUT I DON'T HAVE TIME RIGHT NOW LOLXXX
+    let button = document.querySelector('.click-throttle');
+    let clickStream = Observable.fromEvent(button, 'click');
+    // The 4 lines of code that make the multi-click logic
+    let multiClickStream = clickStream
+      .bufferWhen(() => clickStream.throttleTime(250))
+      .map((list:any) => list.length)
+      .filter((x:any) => x >= 2);
+
+    // Same as above, but detects single clicks
+    let singleClickStream = clickStream
+      .bufferWhen(() => clickStream.throttleTime(250))
+      .map((list:any) => list.length)
+      .filter((x:any) => x === 1);
+
+    // Listen to both streams and render the text label accordingly
+    singleClickStream.subscribe((event:any) => {
+      console.log(event);
+      this.textContent = 'click';
+    });
+    multiClickStream.subscribe((numclicks:any) => {
+      console.log(`${numclicks}x click`);
+      this.textContent = `${numclicks}x click`;
+    });
+    Observable.merge(singleClickStream, multiClickStream)
+      .throttleTime(1000)
+      .subscribe((suggestion:any) => {
+        this.textContent = ''
+      });
+  }
   /**
    * Handle the nameListService observable
    */

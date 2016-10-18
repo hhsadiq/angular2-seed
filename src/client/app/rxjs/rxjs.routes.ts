@@ -3,7 +3,7 @@ import { RxjsComponent } from './index';
 
 export const RxjsRoutes: Route[] = [
   {
-    path: 'rxjs',
+    path: '',
     component: RxjsComponent
   }
 ];
